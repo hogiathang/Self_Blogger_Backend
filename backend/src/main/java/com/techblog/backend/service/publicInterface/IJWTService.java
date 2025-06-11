@@ -1,0 +1,12 @@
+package com.techblog.backend.service.publicInterface;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+public interface IJWTService {
+    String  generateToken(String username, String role);
+    String  generateRefeshToken(String username, String role);
+    String  getRoleFromToken(String token);
+    String  getUsernameFromToken(String token);
+    Boolean isValidToken(String token);
+    String  resolveToken(HttpServletRequest request, String tokenName);
+}
