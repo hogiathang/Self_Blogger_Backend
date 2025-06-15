@@ -1,6 +1,6 @@
 package com.techblog.backend.service.user;
 
-import com.techblog.backend.entity.UserEntity;
+import com.techblog.backend.entity.user.UserEntity;
 import com.techblog.backend.repository.UserRepository;
 import com.techblog.backend.service.publicInterface.IUserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

@@ -1,6 +1,7 @@
-package com.techblog.backend.entity;
+package com.techblog.backend.entity.user;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
@@ -10,38 +11,28 @@ public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name= "id", nullable = false)
+    @Getter
     private Long userId;
 
     @Column(name = "username", nullable = false, unique = true)
+    @Getter
     private String username;
 
     @Column(name = "password", nullable = false)
+    @Getter
     private String password;
 
     @Column(name = "ref", nullable = false, unique = true)
+    @Getter
     private String ref;
 
     @Column(name = "date_created", nullable = false)
+    @Getter
     private String dateCreated;
 
     @Column(name = "role")
+    @Getter
     private String role;
-
-    public String getUsername() {
-        return this.username;
-    }
-
-    public String getPassword() {
-        return this.password;
-    }
-
-    public String getRole() {
-        return this.role;
-    }
-
-    public String ref() {
-        return this.ref;
-    }
 
     public UserEntity() {
         this.dateCreated = LocalDateTime.now().toString();

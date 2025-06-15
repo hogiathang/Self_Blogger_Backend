@@ -1,6 +1,6 @@
 package com.techblog.backend.service.publicInterface;
 
-import com.techblog.backend.entity.UserEntity;
+import com.techblog.backend.entity.user.UserEntity;
 
 import java.util.List;
 

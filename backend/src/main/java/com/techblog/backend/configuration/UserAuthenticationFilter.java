@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -50,20 +51,28 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
             }
 
 
-            Enumeration<String> tokens = request.getHeaders("Set-Cookie");
+            Enumeration<String> cookies = request.getHeaders("Cookie");
             StringBuilder accessToken = new StringBuilder();
             StringBuilder refreshToken = new StringBuilder();
-            tokens.asIterator()
-                    .forEachRemaining(token -> {
-                        if (token.startsWith("accessToken=")) {
-                            accessToken.append(token, "accessToken=".length(), token.indexOf(";"));
-                        } else if (token.startsWith("refreshToken=")) {
-                            refreshToken.append(token, "refreshToken=".length(), token.indexOf(";"));
+
+            cookies.asIterator()
+                    .forEachRemaining(cookie -> {
+                        String[] tokens = cookie.split("; ");
+                        for (String token: tokens) {
+                            if (token.startsWith("accessToken=")) {
+                                accessToken.append(token.substring("accessToken=".length()));
+                            }
+                            if (token.startsWith("refreshToken=")){
+                                refreshToken.append(token.substring("refreshToken=".length()));
+                            }
                         }
                     });
 
             if (!accessToken.isEmpty() && !refreshToken.isEmpty()) {
                 if (jwtService.isValidToken(accessToken.toString())) {
+                    SecurityContextHolder.getContext().setAuthentication(
+                            jwtService.getAuthenticationFromToken(accessToken.toString())
+                    );
                     filterChain.doFilter(request, response);
                 } else if (jwtService.isValidToken(refreshToken.toString())) {
                     String newAccessToken = jwtService.generateToken(
@@ -78,6 +87,9 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
                             .build();
 
                     response.addHeader("Set-Cookie", newAccessCookie.toString());
+                    SecurityContextHolder.getContext().setAuthentication(
+                            jwtService.getAuthenticationFromToken(newAccessToken)
+                    );
                     filterChain.doFilter(request, response);
                 } else {
                     throw new ServletException("Invalid tokens");
@@ -87,7 +99,7 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             logger.error("Error during authentication filter processing: {}", e.getMessage());
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }
 }

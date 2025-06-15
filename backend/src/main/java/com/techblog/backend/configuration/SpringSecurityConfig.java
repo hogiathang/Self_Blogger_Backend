@@ -46,7 +46,6 @@ public class SpringSecurityConfig {
     protected SecurityFilterChain Configuration(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -58,9 +57,7 @@ public class SpringSecurityConfig {
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .anyRequest().authenticated(
-
-                        )
+                        .anyRequest().authenticated()
                 )
         ;
         return http.build();

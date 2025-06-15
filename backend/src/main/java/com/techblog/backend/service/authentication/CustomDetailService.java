@@ -1,6 +1,6 @@
 package com.techblog.backend.service.authentication;
 
-import com.techblog.backend.entity.UserEntity;
+import com.techblog.backend.entity.user.UserEntity;
 import com.techblog.backend.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

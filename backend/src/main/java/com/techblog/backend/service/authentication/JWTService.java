@@ -1,12 +1,17 @@
 package com.techblog.backend.service.authentication;
 
+import com.nimbusds.jwt.JWT;
 import com.techblog.backend.service.publicInterface.IJWTService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 
@@ -15,16 +20,11 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class JWTService implements IJWTService {
     private static final String SIGNATURE = "your-very-secure-secret-key-should-be-long-enough";
-
-    @Value("${expiration[0].access-token}")
-    private long EXPIRATION_TIME;
-
-    @Value("${expiration[1].refresh-token}")
-    private long REFRESH_EXPIRATION_TIME;
 
     @Override
     public String generateToken(String username, String role) {
@@ -33,7 +33,7 @@ public class JWTService implements IJWTService {
                 .claim("role", role)
                 .claim("type", "access_token")
                 .issuedAt(new Date())
-                .expiration(Date.from(Instant.now().plus(EXPIRATION_TIME, ChronoUnit.MILLIS)))
+                .expiration(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)))
                 .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .compact();
     }
@@ -45,7 +45,7 @@ public class JWTService implements IJWTService {
                 .claim("role", role)
                 .claim("type", "refresh_token")
                 .issuedAt(new Date())
-                .expiration(Date.from(Instant.now().plus(REFRESH_EXPIRATION_TIME, ChronoUnit.MILLIS)))
+                .expiration(Date.from(Instant.now().plus(24, ChronoUnit.HOURS)))
                 .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .compact();
     }
@@ -90,20 +90,14 @@ public class JWTService implements IJWTService {
     @Override
     public Boolean isValidToken(String token) {
         try{
-            JwtParser jwtParser = Jwts.parser()
+            Claims claims = Jwts.parser()
                     .verifyWith(getSigningKey())
-                    .build();
-
-
-            boolean isTrueSignature = jwtParser.isSigned(token);
-
-            Claims claims = jwtParser
+                    .build()
                     .parseSignedClaims(token)
                     .getPayload();
             Date expirationDate = claims.getExpiration();
-            boolean isNonExpired = expirationDate != null && expirationDate.after(new Date());
 
-            return isTrueSignature && isNonExpired;
+            return expirationDate != null && expirationDate.after(new Date());
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
@@ -121,6 +115,23 @@ public class JWTService implements IJWTService {
             }
         }
         return token;
+    }
+
+    @Override
+    public Authentication getAuthenticationFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        String username = claims.getSubject();
+        String role = claims.get("role", String.class);
+        if (username == null || role == null) {
+            throw new RuntimeException("Invalid JWT token: missing username or role");
+        }
+        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+        return new UsernamePasswordAuthenticationToken(username, null, authorities);
     }
 
     private SecretKey getSigningKey() {

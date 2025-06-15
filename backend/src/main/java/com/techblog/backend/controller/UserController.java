@@ -3,10 +3,9 @@ package com.techblog.backend.controller;
 import com.techblog.backend.dto.LoginForm;
 import com.techblog.backend.dto.RegisterForm;
 import com.techblog.backend.dto.Token;
-import com.techblog.backend.entity.UserEntity;
+import com.techblog.backend.entity.user.UserEntity;
 import com.techblog.backend.service.publicInterface.IUserService;
 import com.techblog.backend.utils.Utils;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -82,12 +81,4 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-//    /**
-//     * Hiển thị danh sách tất cả người dùng
-//     */
-//    @GetMapping("")
-//    public ResponseEntity<?> getAllUsers() {
-//        return ResponseEntity.ok(userService.getAllUsers());
-//    }
 }
