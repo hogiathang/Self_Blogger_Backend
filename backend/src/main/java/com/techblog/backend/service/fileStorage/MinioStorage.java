@@ -78,12 +78,18 @@ public class MinioStorage implements FileStorageService {
         }
     }
 
+    /**
+     * Hàm này dùng để lấy URL của file đã tải lên
+     * @param bucket tên bucket nơi lưu trữ file
+     * @param fileName tên file cần lấy URL
+     * @return URL của file đã tải lên
+     */
     @Override
-    public String getFileUrl(String bucketName, String fileName) {
+    public String getFileUrl(String bucket, String fileName) {
         try {
             return minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
-                            .bucket(bucketName)
+                            .bucket(bucket)
                             .object(fileName)
                             .method(Method.GET)
                             .build()
@@ -100,7 +106,7 @@ public class MinioStorage implements FileStorageService {
      * @return InputStream của file đã tải xuống
      */
     @Override
-    public InputStream downloadFile(String bucket, String fileName) {
+    public InputStream getFile(String bucket, String fileName) {
         try {
             if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build())) {
                 throw new RuntimeException("Bucket không tồn tại: " + bucket);

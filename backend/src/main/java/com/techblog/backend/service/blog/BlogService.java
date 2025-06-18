@@ -21,6 +21,27 @@ public class BlogService implements IBlogService {
         BlogEntity blogEntity = new BlogEntity();
         blogEntity.setContent(blogDto.getBlogContent());
         blogEntity.setTitle(blogDto.getBlogTitle());
+        blogEntity.setAuthor(username);
+        blogEntity.setVersion(1);
+        return blogRepository.save(blogEntity).getId();
+    }
+
+    @Override
+    public void deleteBlog(String username, String blogTitle) {
+//        blogRepository.deleteById(blogId);
+    }
+
+    @Override
+    public String updateBlog(String username, String blogId, BlogDto blogDto) {
+        BlogEntity blogEntity = blogRepository.findById(blogId)
+                .orElseThrow(() -> new RuntimeException("Blog not found"));
+
+        blogEntity.setContent(blogDto.getBlogContent());
+        blogEntity.setTitle(blogDto.getBlogTitle());
+        blogEntity.setAuthor(username);
+        blogEntity.setVersion(
+                blogEntity.getVersion() + 1
+        );
         return blogRepository.save(blogEntity).getId();
     }
 }

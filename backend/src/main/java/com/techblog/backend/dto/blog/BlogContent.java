@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BlogContent {
     private String type;
+    private String cssVariables;
     private String content;
 }

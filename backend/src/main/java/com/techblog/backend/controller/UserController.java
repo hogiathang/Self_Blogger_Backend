@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +41,7 @@ public class UserController {
             description = "Endpoint cho phép người dùng đăng kí tài khoản mới. Yêu cầu cung cấp tên người dùng, mật khẩu và mã giới thiệu (nếu có)."
     )
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Đăng kí thành công, trả về token"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Đăng kí thành công, trả về token"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Yêu cầu không hợp lệ"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi máy chủ nội bộ")
     })
@@ -54,7 +55,27 @@ public class UserController {
                 "USER"
         );
         userService.addUser(newUser);
-        return Utils.getTokenResponseEntity(newUser.getUsername());
+        Token token =  Utils.getTokenResponseEntity(newUser.getUsername());
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", token.getAccessToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(60 * 60)
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", token.getRefreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(86400)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .headers(headers -> {
+                    headers.add("Set-Cookie", accessCookie.toString());
+                    headers.add("Set-Cookie", refreshCookie.toString());
+                })
+                .body(token);
     }
 
     /**
@@ -73,7 +94,27 @@ public class UserController {
     public ResponseEntity<Token> login(@RequestBody LoginForm loginForm) {
         try{
             if (userService.authenticate(loginForm.getUsername(), loginForm.getPassword())) {
-                return Utils.getTokenResponseEntity(loginForm.getUsername());
+                Token token = Utils.getTokenResponseEntity(loginForm.getUsername());
+                ResponseCookie accessCookie = ResponseCookie.from("accessToken", token.getAccessToken())
+                        .httpOnly(true)
+                        .secure(true)
+                        .path("/")
+                        .maxAge(60 * 60)
+                        .build();
+
+                ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", token.getRefreshToken())
+                        .httpOnly(true)
+                        .secure(true)
+                        .path("/")
+                        .maxAge(86400)
+                        .build();
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .headers(headers -> {
+                            headers.add("Set-Cookie", accessCookie.toString());
+                            headers.add("Set-Cookie", refreshCookie.toString());
+                        })
+                        .body(token);
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }

@@ -4,9 +4,9 @@ import com.techblog.backend.service.publicInterface.IJWTService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -56,6 +56,7 @@ public class SpringSecurityConfig {
                         UsernamePasswordAuthenticationFilter.class
                 )
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.GET,"/api/v1/images/**").permitAll()
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated()
                 )

@@ -2,14 +2,10 @@ package com.techblog.backend.controller;
 
 import com.techblog.backend.dto.blog.BlogDto;
 import com.techblog.backend.service.publicInterface.IBlogService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/user/blog")
@@ -31,7 +27,7 @@ public class BloggedController {
      * Thêm blog mới
      * @return Trả về thông tin blog đã được thêm
      */
-    @PostMapping("/post")
+    @PostMapping("")
     public ResponseEntity<String> postNewBlog(@RequestBody BlogDto blogDto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return ResponseEntity.ok().body(blogService.postBlog(auth.getName(), blogDto));
@@ -41,20 +37,20 @@ public class BloggedController {
      * Xóa blog
      * @return Trả về thông tin blog đã được xóa
      */
-    @PostMapping("/delete")
-    public void deleteBlog() {}
+    @PostMapping("/delete/{blogTitle}")
+    public ResponseEntity<String> deleteBlog(@PathVariable String blogTitle) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        blogService.deleteBlog(auth.getName(), blogTitle);
+        return ResponseEntity.ok().body("Blog deleted successfully");
+    }
 
     /**
      * Cập nhật nội dung blog
-     * @return Trả về thông tin blog đã được cập nhật
+     * @return Trả về id cuả blog đã được cập nhập
      */
-    @PostMapping("/update")
-    public void updateBlog() {}
-
-    /**
-     * Lấy danh sách blog của người dùng
-     * @return Danh sách blog
-     */
-    @PostMapping("/list")
-    public void getListBlog() {}
+    @PostMapping("/update/{blogId}")
+    public ResponseEntity<String> updateBlog(@PathVariable String blogId, @RequestBody BlogDto blogDto) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return ResponseEntity.ok().body(blogService.updateBlog(auth.getName(), blogId, blogDto));
+    }
 }

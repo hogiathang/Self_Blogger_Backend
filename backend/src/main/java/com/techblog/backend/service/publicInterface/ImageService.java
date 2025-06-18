@@ -1,9 +1,14 @@
 package com.techblog.backend.service.publicInterface;
 
-public interface ImageService {
-    String saveImage(String username, byte[] imageData, String imageName);
+import com.techblog.backend.dto.image.ImageResponseDto;
+import jakarta.servlet.http.HttpServletRequest;
 
-    String getImage(String username, String imageName);
+import java.io.InputStream;
+
+public interface ImageService {
+    ImageResponseDto saveImage(String username, byte[] imageData, String imageName, String contentType, HttpServletRequest request);
+
+    InputStream getImage(String username, String imageName);
 
     String deleteImage(String username, String imageName);
 }

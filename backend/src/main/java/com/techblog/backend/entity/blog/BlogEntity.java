@@ -21,7 +21,7 @@ public class BlogEntity {
     @Column(name = "id", updatable = false, nullable = false)
     private String id;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", nullable = false, unique = false)
     private String title;
 
     @Convert(converter = BlogContentConverter.class)
@@ -36,4 +36,7 @@ public class BlogEntity {
 
     @Column(name = "author", nullable = false)
     private String author;
+
+    @Column(name= "version", nullable = false)
+    private int version;
 }

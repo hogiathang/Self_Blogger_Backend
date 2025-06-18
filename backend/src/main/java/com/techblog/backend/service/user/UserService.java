@@ -1,6 +1,7 @@
 package com.techblog.backend.service.user;
 
 import com.techblog.backend.entity.user.UserEntity;
+import com.techblog.backend.exception.UserAlreadyExistedException;
 import com.techblog.backend.repository.UserRepository;
 import com.techblog.backend.service.publicInterface.IUserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -30,7 +31,11 @@ public class UserService implements IUserService {
 
     @Override
     public void addUser(UserEntity user) {
-        userRepository.save(user);
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            throw new UserAlreadyExistedException("User already exists with username: " + user.getUsername());
+        } else {
+            userRepository.save(user);
+        }
     }
 
     @Override

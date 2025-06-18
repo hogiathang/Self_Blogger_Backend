@@ -36,4 +36,30 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(UserAlreadyExistedException.class)
+    public ResponseEntity<ErrorResponseDto> handleUserAlreadyExistedException(Exception ex, WebRequest request) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                request.getDescription(false),
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                LocalDateTime.now().toString()
+        );
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorResponseDto);
+    }
+
+    @ExceptionHandler(IlegalArgumentException.class)
+    public ResponseEntity<ErrorResponseDto> handleIlegalArgumentException(IlegalArgumentException ex, WebRequest request) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                request.getDescription(false),
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                LocalDateTime.now().toString()
+        );
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorResponseDto);
+    }
 }

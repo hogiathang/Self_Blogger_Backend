@@ -36,6 +36,12 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             String requestURI = request.getRequestURI();
+            String method = request.getMethod();
+
+            if ("GET".equalsIgnoreCase(method) && requestURI.startsWith("/api/v1/images/")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
             for (String endPoint : PUBLIC_ENDPOINTS) {
                 if (endPoint.endsWith("/**")) {
