@@ -1,4 +1,4 @@
-package com.techblog.backend.repository;
+package com.techblog.backend.repository.blog;
 
 import com.techblog.backend.entity.blog.BlogEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

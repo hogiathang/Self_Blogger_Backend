@@ -1,4 +1,4 @@
-package com.techblog.backend.dto.utils;
+package com.techblog.backend.dto.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;

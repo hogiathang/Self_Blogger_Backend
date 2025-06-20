@@ -1,4 +1,4 @@
-package com.techblog.backend.repository;
+package com.techblog.backend.repository.user;
 
 import com.techblog.backend.entity.user.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

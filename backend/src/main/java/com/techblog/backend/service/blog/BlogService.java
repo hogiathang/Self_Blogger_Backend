@@ -2,7 +2,7 @@ package com.techblog.backend.service.blog;
 
 import com.techblog.backend.dto.blog.BlogDto;
 import com.techblog.backend.entity.blog.BlogEntity;
-import com.techblog.backend.repository.BlogRepository;
+import com.techblog.backend.repository.blog.BlogRepository;
 import com.techblog.backend.service.publicInterface.file.FileStorageService;
 import com.techblog.backend.service.publicInterface.file.IBlogService;
 import jakarta.servlet.http.HttpServletRequest;

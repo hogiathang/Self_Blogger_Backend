@@ -1,7 +1,7 @@
 package com.techblog.backend.service.image;
 
 import com.techblog.backend.dto.image.ImageResponseDto;
-import com.techblog.backend.exception.IlegalArgumentException;
+import com.techblog.backend.exception.all.IlegalArgumentException;
 import com.techblog.backend.service.publicInterface.file.FileStorageService;
 import com.techblog.backend.service.publicInterface.file.ImageService;
 import jakarta.servlet.http.HttpServletRequest;

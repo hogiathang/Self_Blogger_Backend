@@ -1,4 +1,4 @@
-package com.techblog.backend.controller;
+package com.techblog.backend.controller.search;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

@@ -1,4 +1,4 @@
-package com.techblog.backend.controller;
+package com.techblog.backend.controller.image;
 
 import com.techblog.backend.dto.image.ImageResponseDto;
 import com.techblog.backend.service.publicInterface.file.ImageService;

@@ -1,8 +1,8 @@
-package com.techblog.backend.controller;
+package com.techblog.backend.controller.user;
 
 import com.techblog.backend.dto.user.LoginForm;
 import com.techblog.backend.dto.user.RegisterForm;
-import com.techblog.backend.dto.token.TokenUtils;
+import com.techblog.backend.dto.utils.TokenUtils;
 import com.techblog.backend.dto.user.UserResponseDto;
 import com.techblog.backend.service.publicInterface.user.IUserPublicService;
 import com.techblog.backend.utils.Utils;
@@ -73,21 +73,17 @@ public class UserAuthenticationController {
     })
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginForm loginForm) {
-        try{
-            if (userService.authenticate(loginForm.getUsername(), loginForm.getPassword())) {
-                TokenUtils token = Utils.getTokenResponseEntity(loginForm.getUsername());
+        if (userService.authenticate(loginForm.getUsername(), loginForm.getPassword())) {
+            TokenUtils token = Utils.getTokenResponseEntity(loginForm.getUsername());
 
-                return ResponseEntity.status(HttpStatus.OK)
-                        .headers(headers -> {
-                            headers.add("Set-Cookie", token.getAccessToken().toString());
-                            headers.add("Set-Cookie", token.getRefreshToken().toString());
-                        })
-                        .body("Login successful, token set in cookies");
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.OK)
+                    .headers(headers -> {
+                        headers.add("Set-Cookie", token.getAccessToken().toString());
+                        headers.add("Set-Cookie", token.getRefreshToken().toString());
+                    })
+                    .body("Login successful, token set in cookies");
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 }

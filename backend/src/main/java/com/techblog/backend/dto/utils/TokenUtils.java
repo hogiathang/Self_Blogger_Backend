@@ -1,4 +1,4 @@
-package com.techblog.backend.dto.token;
+package com.techblog.backend.dto.utils;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

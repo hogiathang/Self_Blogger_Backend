@@ -11,7 +11,6 @@ public class Mapper {
      * @return UserEntity đã được cập nhật với các giá trị từ UserEditForm
      */
     public static UserEntity editForm2UserEntity(UserEditForm userEditForm, UserEntity userEntity) {
-        userEntity.setUsername((String) Utils.setValue(userEntity.getUsername(), userEditForm.getUsername()));
         userEntity.setEmail((String) Utils.setValue(userEntity.getEmail(), userEditForm.getEmail()));
         userEntity.setPhone((String) Utils.setValue(userEntity.getPhone(), userEditForm.getPhoneNumber()));
         userEntity.setActive(userEditForm.isActive());

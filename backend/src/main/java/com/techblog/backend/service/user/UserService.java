@@ -5,12 +5,13 @@ import com.techblog.backend.dto.user.UserEditForm;
 import com.techblog.backend.dto.user.UserResponseDto;
 import com.techblog.backend.dto.user.UserSecureResponse;
 import com.techblog.backend.entity.user.UserEntity;
-import com.techblog.backend.exception.NoContentException;
-import com.techblog.backend.exception.UserAlreadyExistedException;
-import com.techblog.backend.repository.UserRepository;
+import com.techblog.backend.exception.all.NoContentException;
+import com.techblog.backend.exception.user.UserAlreadyExistedException;
+import com.techblog.backend.repository.user.UserRepository;
 import com.techblog.backend.service.publicInterface.user.IUserPublicService;
 import com.techblog.backend.service.publicInterface.user.IUserService;
 import com.techblog.backend.utils.Mapper;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -97,7 +98,7 @@ public class UserService implements IUserService, IUserPublicService {
     @Override
     public boolean authenticate(String username, String rawPassword) {
         UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         return passwordEncoder.matches(rawPassword, user.getPassword());
     }

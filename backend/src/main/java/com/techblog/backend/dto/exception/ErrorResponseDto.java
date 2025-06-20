@@ -1,12 +1,16 @@
-package com.techblog.backend.dto;
+package com.techblog.backend.dto.exception;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @Schema (
         name= "ErrorResponseDto",
         description = "Schema to hold error response information"
 )
+@Data
+@NoArgsConstructor
 public class ErrorResponseDto {
     @Schema(
             description = "API path"

@@ -1,4 +1,4 @@
-package com.techblog.backend.controller;
+package com.techblog.backend.controller.blog;
 
 import com.techblog.backend.dto.blog.BlogDto;
 import com.techblog.backend.service.publicInterface.file.IBlogService;

@@ -1,6 +1,6 @@
 package com.techblog.backend.utils;
 
-import com.techblog.backend.dto.token.TokenUtils;
+import com.techblog.backend.dto.utils.TokenUtils;
 import com.techblog.backend.service.authentication.JWTService;
 import com.techblog.backend.service.publicInterface.jwt.IJWTService;
 import org.springframework.http.ResponseCookie;

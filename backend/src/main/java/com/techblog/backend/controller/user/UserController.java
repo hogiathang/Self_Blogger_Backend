@@ -1,4 +1,4 @@
-package com.techblog.backend.controller;
+package com.techblog.backend.controller.user;
 
 import com.techblog.backend.dto.user.UserEditForm;
 import com.techblog.backend.dto.user.UserResponseDto;
@@ -28,14 +28,10 @@ public class UserController {
             @PathVariable Long userId,
             @RequestBody UserEditForm userEditForm
     ) {
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-            UserResponseDto updatedUser = userService.editUser(userId, auth.getName(), userEditForm);
-            return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        UserResponseDto updatedUser = userService.editUser(userId, auth.getName(), userEditForm);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
     }
 
     /**
@@ -43,13 +39,9 @@ public class UserController {
      */
     @GetMapping("/{userId}")
     public ResponseEntity<UserSecureResponse> getUserInfo(@PathVariable Long userId) {
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            UserSecureResponse userInfo = userService.getUserInfo(userId, auth.getName());
-            return ResponseEntity.status(HttpStatus.OK).body(userInfo);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserSecureResponse userInfo = userService.getUserInfo(userId, auth.getName());
+        return ResponseEntity.status(HttpStatus.OK).body(userInfo);
     }
 
     /**
@@ -57,12 +49,8 @@ public class UserController {
      */
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            userService.deleteUser(userId);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        userService.deleteUser(userId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
