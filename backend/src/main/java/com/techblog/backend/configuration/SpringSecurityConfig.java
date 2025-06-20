@@ -1,6 +1,6 @@
 package com.techblog.backend.configuration;
 
-import com.techblog.backend.service.publicInterface.IJWTService;
+import com.techblog.backend.service.publicInterface.jwt.IJWTService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,7 +52,7 @@ public class SpringSecurityConfig {
                 .oauth2Login(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .addFilterBefore(
-                        new UserAuthenticationFilter(jwtService),
+                        userAuthenticationFilter(),
                         UsernamePasswordAuthenticationFilter.class
                 )
                 .authorizeHttpRequests(authorize -> authorize
@@ -62,6 +62,11 @@ public class SpringSecurityConfig {
                 )
         ;
         return http.build();
+    }
+
+    @Bean
+    public UserAuthenticationFilter userAuthenticationFilter() {
+        return new UserAuthenticationFilter(jwtService);
     }
 
     @Bean

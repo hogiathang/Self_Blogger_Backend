@@ -1,9 +1,11 @@
 package com.techblog.backend.dto.utils;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Schema(description = "Base User Data Transfer Object")
 public class BaseUserDto {
     @Schema(
@@ -33,15 +35,4 @@ public class BaseUserDto {
         this.createdAt = LocalDateTime.now();
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
 }

@@ -1,4 +1,4 @@
-package com.techblog.backend.service.publicInterface;
+package com.techblog.backend.service.publicInterface.file;
 
 import java.io.InputStream;
 

@@ -62,4 +62,17 @@ public class GlobalException extends ResponseEntityExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(errorResponseDto);
     }
+
+    @ExceptionHandler(NoContentException.class)
+    public ResponseEntity<ErrorResponseDto> handleNoContentException(NoContentException ex, WebRequest request) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                request.getDescription(false),
+                HttpStatus.NO_CONTENT,
+                ex.getMessage(),
+                LocalDateTime.now().toString()
+        );
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .body(errorResponseDto);
+    }
 }

@@ -1,16 +1,21 @@
 package com.techblog.backend.service.user;
 
+import com.techblog.backend.dto.user.RegisterForm;
+import com.techblog.backend.dto.user.UserEditForm;
+import com.techblog.backend.dto.user.UserResponseDto;
+import com.techblog.backend.dto.user.UserSecureResponse;
 import com.techblog.backend.entity.user.UserEntity;
+import com.techblog.backend.exception.NoContentException;
 import com.techblog.backend.exception.UserAlreadyExistedException;
 import com.techblog.backend.repository.UserRepository;
-import com.techblog.backend.service.publicInterface.IUserService;
+import com.techblog.backend.service.publicInterface.user.IUserPublicService;
+import com.techblog.backend.service.publicInterface.user.IUserService;
+import com.techblog.backend.utils.Mapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
-public class UserService implements IUserService {
+public class UserService implements IUserService, IUserPublicService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -20,30 +25,66 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<UserEntity> getAllUsers() {
-        return userRepository.findAll();
+    public UserSecureResponse getUserInfo(Long id, String username) {
+        UserEntity userEntity = userRepository.findById(id)
+                .orElseThrow(() -> new NoContentException("User not found with id: " + id));
+
+        if (!userEntity.getUsername().equals(username)) {
+            throw new RuntimeException("You are not authorized to view this user");
+        }
+
+        return new UserSecureResponse(
+            userEntity.getUserId(),
+            userEntity.getUsername(),
+            userEntity.getEmail(),
+            userEntity.getPhone(),
+            userEntity.getDateCreated(),
+            userEntity.getRole(),
+            userEntity.isActive()
+        );
     }
 
     @Override
-    public UserEntity getUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
-    }
+    public UserResponseDto addUser(RegisterForm registerForm) {
 
-    @Override
-    public void addUser(UserEntity user) {
-        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new UserAlreadyExistedException("User already exists with username: " + user.getUsername());
+        if (userRepository.findByUsername(registerForm.getUsername()).isPresent()) {
+            throw new UserAlreadyExistedException("User already exists with username: " + registerForm.getUsername());
         } else {
-            userRepository.save(user);
+            UserEntity userEntity =  userRepository.save(
+                new UserEntity(
+                        registerForm.getUsername(),
+                        passwordEncoder.encode(registerForm.getPassword()),
+                        registerForm.getEmail(),
+                        registerForm.getPhone(),
+                        "USER"
+                )
+            );
+
+            return new UserResponseDto(
+                    userEntity.getUserId(),
+                    userEntity.getUsername(),
+                    userEntity.getDateCreated(),
+                    userEntity.isActive()
+            );
         }
     }
 
     @Override
-    public UserEntity updateUser(Long id, UserEntity user) {
-        if (userRepository.existsById(id)) {
-            return userRepository.save(user);
+    public UserResponseDto editUser(Long id, String username, UserEditForm user) {
+        UserEntity existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+
+        if (!existingUser.getUsername().equals(username)) {
+            throw new RuntimeException("You are not authorized to edit this user");
         }
-        return null;
+
+        UserEntity updatedUser = userRepository.save(Mapper.editForm2UserEntity(user, existingUser));
+        return new UserResponseDto(
+                updatedUser.getUserId(),
+                updatedUser.getUsername(),
+                updatedUser.getDateCreated(),
+                updatedUser.isActive()
+        );
     }
 
     @Override

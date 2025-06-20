@@ -1,6 +1,6 @@
 package com.techblog.backend.configuration;
 
-import com.techblog.backend.service.publicInterface.IJWTService;
+import com.techblog.backend.service.publicInterface.jwt.IJWTService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,30 +33,28 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        String method = request.getMethod();
+        if ("GET".equalsIgnoreCase(method) && requestURI.startsWith("/api/v1/images/")) {
+            return true;
+        }
+        for (String endPoint : PUBLIC_ENDPOINTS) {
+            if (endPoint.endsWith("/**")) {
+                endPoint = endPoint.substring(0, endPoint.length() - 3);
+                if (requestURI.startsWith(endPoint)) {
+                    return true;
+                }
+            } else if (requestURI.equals(endPoint)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-            String requestURI = request.getRequestURI();
-            String method = request.getMethod();
-
-            if ("GET".equalsIgnoreCase(method) && requestURI.startsWith("/api/v1/images/")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            for (String endPoint : PUBLIC_ENDPOINTS) {
-                if (endPoint.endsWith("/**")) {
-                    endPoint = endPoint.substring(0, endPoint.length() - 3);
-                    if (requestURI.startsWith(endPoint)) {
-                        filterChain.doFilter(request, response);
-                        return;
-                    }
-                } else if (requestURI.equals(endPoint)) {
-                    filterChain.doFilter(request, response);
-                    return;
-                }
-            }
-
-
             Enumeration<String> cookies = request.getHeaders("Cookie");
             StringBuilder accessToken = new StringBuilder();
             StringBuilder refreshToken = new StringBuilder();

@@ -1,6 +1,6 @@
 package com.techblog.backend.service.fileStorage;
 
-import com.techblog.backend.service.publicInterface.FileStorageService;
+import com.techblog.backend.service.publicInterface.file.FileStorageService;
 import io.minio.*;
 import io.minio.http.Method;
 import jakarta.annotation.PostConstruct;

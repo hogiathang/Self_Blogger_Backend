@@ -2,8 +2,8 @@ package com.techblog.backend.service.image;
 
 import com.techblog.backend.dto.image.ImageResponseDto;
 import com.techblog.backend.exception.IlegalArgumentException;
-import com.techblog.backend.service.publicInterface.FileStorageService;
-import com.techblog.backend.service.publicInterface.ImageService;
+import com.techblog.backend.service.publicInterface.file.FileStorageService;
+import com.techblog.backend.service.publicInterface.file.ImageService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 

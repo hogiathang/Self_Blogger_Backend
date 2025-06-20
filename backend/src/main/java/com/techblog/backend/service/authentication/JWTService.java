@@ -1,14 +1,10 @@
 package com.techblog.backend.service.authentication;
 
-import com.nimbusds.jwt.JWT;
-import com.techblog.backend.service.publicInterface.IJWTService;
+import com.techblog.backend.service.publicInterface.jwt.IJWTService;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -1,4 +1,4 @@
-package com.techblog.backend.service.publicInterface;
+package com.techblog.backend.service.publicInterface.file;
 
 import com.techblog.backend.dto.image.ImageResponseDto;
 import jakarta.servlet.http.HttpServletRequest;

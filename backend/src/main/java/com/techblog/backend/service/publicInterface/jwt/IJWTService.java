@@ -1,4 +1,4 @@
-package com.techblog.backend.service.publicInterface;
+package com.techblog.backend.service.publicInterface.jwt;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;

@@ -1,4 +1,4 @@
-package com.techblog.backend.dto;
+package com.techblog.backend.dto.user;
 
 import com.techblog.backend.dto.utils.BaseUserDto;
 
