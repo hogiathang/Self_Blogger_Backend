@@ -2,9 +2,11 @@ package com.techblog.backend.dto.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+@Setter
 @Getter
 @Schema(description = "Base User Data Transfer Object")
 public class BaseUserDto {

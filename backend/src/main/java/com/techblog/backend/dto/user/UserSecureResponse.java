@@ -21,6 +21,8 @@ public class UserSecureResponse {
 
     private LocalDateTime dateCreated;
 
+    private String avatarUrl;
+
     private String role;
 
     private boolean isActive;

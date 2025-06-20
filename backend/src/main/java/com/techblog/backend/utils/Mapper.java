@@ -1,7 +1,11 @@
 package com.techblog.backend.utils;
 
+import com.techblog.backend.dto.user.RegisterForm;
 import com.techblog.backend.dto.user.UserEditForm;
+import com.techblog.backend.dto.user.UserResponseDto;
+import com.techblog.backend.dto.user.UserSecureResponse;
 import com.techblog.backend.entity.user.UserEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class Mapper {
     /**
@@ -13,7 +17,60 @@ public class Mapper {
     public static UserEntity editForm2UserEntity(UserEditForm userEditForm, UserEntity userEntity) {
         userEntity.setEmail((String) Utils.setValue(userEntity.getEmail(), userEditForm.getEmail()));
         userEntity.setPhone((String) Utils.setValue(userEntity.getPhone(), userEditForm.getPhoneNumber()));
+        userEntity.setAvatarUrl((String) Utils.setValue(userEntity.getAvatarUrl(), userEditForm.getAvatarUrl()));
         userEntity.setActive(userEditForm.isActive());
         return userEntity;
+    }
+
+    /**
+     * Chuyển đổi UserEntity sang UserResponseDto.
+     * @param user Thực thể người dùng
+     * @return UserResponseDto chứa thông tin người dùng
+     */
+    public static UserResponseDto userEntity2UserResponseDto(UserEntity user) {
+        return new UserResponseDto(
+                user.getUserId(),
+                user.getUsername(),
+                user.getDateCreated(),
+                user.getAvatarUrl(),
+                user.isActive()
+        );
+    }
+
+    /**
+     * Chuyển đổi UserEntity sang UserSecureResponse.
+     * @param user Thực thể người dùng
+     * @return UserSecureResponse chứa thông tin bảo mật của người dùng
+     */
+    public static UserSecureResponse userEntity2UserSecureResponse(UserEntity user) {
+        return new UserSecureResponse(
+                user.getUserId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getDateCreated(),
+                user.getAvatarUrl(),
+                user.getRole(),
+                user.isActive()
+        );
+    }
+
+    /**
+     * Chuyển đổi RegisterForm sang UserEntity.
+     * @param registerForm Form đăng ký người dùng
+     * @param passwordEncoder Mã hóa mật khẩu
+     * @param role Vai trò của người dùng
+     * @return UserEntity đã được tạo từ RegisterForm
+     */
+    public static UserEntity registerForm2UserEntity(RegisterForm registerForm,
+                                                     BCryptPasswordEncoder passwordEncoder,
+                                                     String role) {
+        return new UserEntity(
+                registerForm.getUsername(),
+                passwordEncoder.encode(registerForm.getPassword()),
+                registerForm.getEmail(),
+                registerForm.getPhone(),
+                role
+        );
     }
 }

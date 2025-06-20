@@ -72,18 +72,15 @@ public class UserAuthenticationController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi máy chủ nội bộ")
     })
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginForm loginForm) {
-        if (userService.authenticate(loginForm.getUsername(), loginForm.getPassword())) {
-            TokenUtils token = Utils.getTokenResponseEntity(loginForm.getUsername());
+    public ResponseEntity<UserResponseDto> login(@RequestBody LoginForm loginForm) {
+        UserResponseDto user = userService.authenticate(loginForm.getUsername(), loginForm.getPassword());
+        TokenUtils token = Utils.getTokenResponseEntity(loginForm.getUsername());
 
-            return ResponseEntity.status(HttpStatus.OK)
-                    .headers(headers -> {
-                        headers.add("Set-Cookie", token.getAccessToken().toString());
-                        headers.add("Set-Cookie", token.getRefreshToken().toString());
-                    })
-                    .body("Login successful, token set in cookies");
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .headers(headers -> {
+                    headers.add("Set-Cookie", token.getAccessToken().toString());
+                    headers.add("Set-Cookie", token.getRefreshToken().toString());
+                })
+                .body(user);
     }
 }

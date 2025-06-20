@@ -37,8 +37,12 @@ public class UserEntity {
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
 
+    @Column(name = "avatar_url", nullable = false)
+    private String avatarUrl;
+
     public UserEntity() {
         this.dateCreated = LocalDateTime.now();
+        this.avatarUrl   = "http://localhost:8081/api/v1/images/default/avatar.png";
     }
 
     public UserEntity(String username, String password, String email, String phone, String role) {
@@ -49,5 +53,6 @@ public class UserEntity {
         this.role = role;
         this.dateCreated = LocalDateTime.now();
         this.isActive = true;
+        this.avatarUrl = "http://localhost:8081/api/v1/images/default/avatar.png";
     }
 }

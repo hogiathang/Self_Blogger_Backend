@@ -10,8 +10,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserResponseDto {
-    public Long userId;
-    public String username;
-    public LocalDateTime dateCreated;
-    public boolean isActive;
+    private Long userId;
+    private String username;
+    private LocalDateTime dateCreated;
+    private String avatarUrl;
+    private boolean isActive;
 }

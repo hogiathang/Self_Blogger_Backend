@@ -6,5 +6,6 @@ import lombok.Data;
 public class UserEditForm {
     private String email;
     private String phoneNumber;
+    private String avatarUrl;
     private boolean active;
 }

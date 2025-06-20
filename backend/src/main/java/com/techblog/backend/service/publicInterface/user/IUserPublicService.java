@@ -5,5 +5,5 @@ import com.techblog.backend.dto.user.UserResponseDto;
 
 public interface IUserPublicService {
     UserResponseDto addUser(RegisterForm user);
-    boolean authenticate(String username, String rawPassword);
+    UserResponseDto authenticate(String username, String rawPassword);
 }

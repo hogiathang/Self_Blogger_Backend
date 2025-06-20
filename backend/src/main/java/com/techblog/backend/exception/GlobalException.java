@@ -4,6 +4,7 @@ import com.techblog.backend.dto.exception.ErrorResponseDto;
 import com.techblog.backend.exception.all.IlegalArgumentException;
 import com.techblog.backend.exception.all.NoContentException;
 import com.techblog.backend.exception.user.AuthMethodNotSupportedException;
+import com.techblog.backend.exception.user.UnAuthorizedException;
 import com.techblog.backend.exception.user.UserAlreadyExistedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -91,6 +92,19 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         );
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
+                .body(errorResponseDto);
+    }
+
+    @ExceptionHandler(UnAuthorizedException.class)
+    public ResponseEntity<ErrorResponseDto> handleUnAuthorizedException(UnAuthorizedException ex, WebRequest request) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                request.getDescription(false),
+                HttpStatus.UNAUTHORIZED,
+                ex.getMessage(),
+                LocalDateTime.now().toString()
+        );
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(errorResponseDto);
     }
 }

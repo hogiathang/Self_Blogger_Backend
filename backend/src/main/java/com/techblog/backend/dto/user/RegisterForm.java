@@ -1,9 +1,10 @@
 package com.techblog.backend.dto.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
+@Setter
 @Schema(
         description = "Đối tượng dùng để đăng kí người dùng mới",
         title = "RegisterForm"
@@ -23,5 +24,4 @@ public class RegisterForm extends BaseUserDto {
         this.email = email;
         this.phone = phone;
     }
-
 }

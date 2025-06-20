@@ -6,6 +6,7 @@ import com.techblog.backend.dto.user.UserResponseDto;
 import com.techblog.backend.dto.user.UserSecureResponse;
 import com.techblog.backend.entity.user.UserEntity;
 import com.techblog.backend.exception.all.NoContentException;
+import com.techblog.backend.exception.user.UnAuthorizedException;
 import com.techblog.backend.exception.user.UserAlreadyExistedException;
 import com.techblog.backend.repository.user.UserRepository;
 import com.techblog.backend.service.publicInterface.user.IUserPublicService;
@@ -29,44 +30,25 @@ public class UserService implements IUserService, IUserPublicService {
     public UserSecureResponse getUserInfo(Long id, String username) {
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new NoContentException("User not found with id: " + id));
-
         if (!userEntity.getUsername().equals(username)) {
             throw new RuntimeException("You are not authorized to view this user");
         }
-
-        return new UserSecureResponse(
-            userEntity.getUserId(),
-            userEntity.getUsername(),
-            userEntity.getEmail(),
-            userEntity.getPhone(),
-            userEntity.getDateCreated(),
-            userEntity.getRole(),
-            userEntity.isActive()
-        );
+        return Mapper.userEntity2UserSecureResponse(userEntity);
     }
 
     @Override
     public UserResponseDto addUser(RegisterForm registerForm) {
-
         if (userRepository.findByUsername(registerForm.getUsername()).isPresent()) {
             throw new UserAlreadyExistedException("User already exists with username: " + registerForm.getUsername());
         } else {
             UserEntity userEntity =  userRepository.save(
-                new UserEntity(
-                        registerForm.getUsername(),
-                        passwordEncoder.encode(registerForm.getPassword()),
-                        registerForm.getEmail(),
-                        registerForm.getPhone(),
-                        "USER"
+                Mapper.registerForm2UserEntity(
+                    registerForm,
+                    passwordEncoder,
+                    "ROLE_USER"
                 )
             );
-
-            return new UserResponseDto(
-                    userEntity.getUserId(),
-                    userEntity.getUsername(),
-                    userEntity.getDateCreated(),
-                    userEntity.isActive()
-            );
+            return Mapper.userEntity2UserResponseDto(userEntity);
         }
     }
 
@@ -80,12 +62,7 @@ public class UserService implements IUserService, IUserPublicService {
         }
 
         UserEntity updatedUser = userRepository.save(Mapper.editForm2UserEntity(user, existingUser));
-        return new UserResponseDto(
-                updatedUser.getUserId(),
-                updatedUser.getUsername(),
-                updatedUser.getDateCreated(),
-                updatedUser.isActive()
-        );
+        return Mapper.userEntity2UserResponseDto(updatedUser);
     }
 
     @Override
@@ -96,10 +73,14 @@ public class UserService implements IUserService, IUserPublicService {
     }
 
     @Override
-    public boolean authenticate(String username, String rawPassword) {
+    public UserResponseDto authenticate(String username, String rawPassword) {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-        return passwordEncoder.matches(rawPassword, user.getPassword());
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            throw new UnAuthorizedException("Invalid password for user: " + username);
+        }
+
+        return Mapper.userEntity2UserResponseDto(user);
     }
 }
