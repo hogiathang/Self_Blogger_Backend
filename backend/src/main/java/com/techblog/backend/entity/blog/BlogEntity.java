@@ -40,6 +40,9 @@ public class BlogEntity extends BaseEntity implements Serializable {
     @Column(name = "content_size", nullable = false)
     private long contentSize;
 
+    @Column(name = "is_draft", nullable = false)
+    private boolean isDraft;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "username", nullable = false)
     private UserEntity author;

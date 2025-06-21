@@ -1,8 +1,6 @@
 package com.techblog.backend.service.blog;
 
-import com.techblog.backend.dto.blog.BlogRequestDto;
-import com.techblog.backend.dto.blog.BlogResponse;
-import com.techblog.backend.dto.blog.OutputContentResponse;
+import com.techblog.backend.dto.blog.*;
 import com.techblog.backend.entity.blog.BlogEntity;
 import com.techblog.backend.entity.user.UserEntity;
 import com.techblog.backend.exception.all.NoContentException;
@@ -13,7 +11,6 @@ import com.techblog.backend.service.publicInterface.file.IBlogService;
 import com.techblog.backend.utils.Mapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
-import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -42,18 +39,6 @@ public class BlogService implements IBlogService {
     public BlogResponse postBlog(BlogRequestDto blogRequest, HttpServletRequest request) throws IOException {
         UUID blogId = UUID.randomUUID();
 
-        InputStream contentStream = new ByteArrayInputStream(
-                blogRequest.getContent().getBytes(StandardCharsets.UTF_8)
-        );
-
-        fileStorageService.uploadFile(
-                "blog." + blogRequest.getAuthorUsername().toLowerCase(),
-                blogId.toString() + ".html",
-                contentStream,
-                blogRequest.getContentSize(),
-                blogRequest.getContentType()
-        );
-
         StringBuilder blogUrl = new StringBuilder(request.getScheme());
         blogUrl.append("://")
                 .append(request.getServerName())
@@ -70,6 +55,19 @@ public class BlogService implements IBlogService {
         blogEntity.setAuthor(userRef);
 
         blogRepository.save(blogEntity);
+
+        InputStream contentStream = new ByteArrayInputStream(
+                blogRequest.getContent().getBytes(StandardCharsets.UTF_8)
+        );
+
+        fileStorageService.uploadFile(
+                "blog." + blogRequest.getAuthorUsername().toLowerCase(),
+                blogId.toString() + ".html",
+                contentStream,
+                blogRequest.getContentSize(),
+                blogRequest.getContentType()
+        );
+
         return new BlogResponse(
                 blogEntity.getId().toString(),
                 blogEntity.getHtmlPath(),
@@ -97,20 +95,7 @@ public class BlogService implements IBlogService {
                 blogEntity.getAuthor().getUsername()
         );
     }
-//
-//    @Override
-//    public BlogDto getAuthBlog(String username, String blogId) {
-//        BlogEntity blogEntity = blogRepository.findById(UUID.fromString(blogId))
-//                .orElseThrow(() -> new RuntimeException("Blog not found"));
-//
-////        if (!blogEntity.getAuthor().equalsIgnoreCase(username)) {
-////            throw new RuntimeException("You do not have permission to access this blog");
-////        }
-////        return createBlogDto(blogEntity);
-//        return null;
-//    }
-//
-//
+
     @Transactional
     @Override
     public void deleteBlog(String username, String blogId) {
@@ -130,5 +115,27 @@ public class BlogService implements IBlogService {
             throw new RuntimeException("Failed to delete blog file from storage");
         }
 
+    }
+
+    @Override
+    public BlogResponse updateBlog(String blogId, BlogPatchRequest blogRequest) {
+        BlogEntity blogEntity = blogRepository.findById(UUID.fromString(blogId))
+                .orElseThrow(() -> new NoContentException("Blog not found"));
+
+        blogRepository.save(Mapper.blogPatch2BlogEntity(blogRequest, blogEntity));
+
+        return new BlogResponse(
+                blogEntity.getId().toString(),
+                blogEntity.getHtmlPath(),
+                "Blog updated successfully"
+        );
+    }
+
+    @Override
+    public List<BlogContentResponse> getOwnBlogs(String username, int page, int size) {
+        return blogRepository.findByAuthorName(username, size, page * size)
+                .stream()
+                .map(Mapper::blogEntity2BlogContentResponse)
+                .toList();
     }
 }

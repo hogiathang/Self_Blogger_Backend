@@ -1,13 +1,12 @@
 package com.techblog.backend.service.publicInterface.file;
 
 
-import com.techblog.backend.dto.blog.BlogRequestDto;
-import com.techblog.backend.dto.blog.BlogResponse;
-import com.techblog.backend.dto.blog.OutputContentResponse;
+import com.techblog.backend.dto.blog.*;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 public interface IBlogService {
     BlogResponse postBlog(BlogRequestDto blogRequest, HttpServletRequest request) throws IOException;
@@ -18,5 +17,7 @@ public interface IBlogService {
 //
     void deleteBlog(String username, String blogId);
 //
-//    String updateBlogStatus(String username, String blogId);
+    BlogResponse updateBlog(String blogId, BlogPatchRequest blogRequest);
+
+    List<BlogContentResponse> getOwnBlogs(String username, int page, int size);
 }

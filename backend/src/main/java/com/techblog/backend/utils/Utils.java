@@ -5,6 +5,8 @@ import com.techblog.backend.service.authentication.JWTService;
 import com.techblog.backend.service.publicInterface.jwt.IJWTService;
 import org.springframework.http.ResponseCookie;
 
+import java.util.List;
+
 /**
  * Utils class dùng để chứa các phương thức tiện ích chung cho toàn bộ ứng dụng.
  */
@@ -50,5 +52,10 @@ public class Utils {
     public static Object setValue(Object o1, Object o2) {
         if (o2 == null) return o1;
         else return o2;
+    }
+
+    public static List<String> extractTags(String content) {
+        String[] tagsArray = content.split(",");
+        return List.of(tagsArray);
     }
 }

@@ -1,5 +1,6 @@
 package com.techblog.backend.controller.blog;
 
+import com.techblog.backend.dto.blog.BlogPatchRequest;
 import com.techblog.backend.dto.blog.BlogRequestDto;
 import com.techblog.backend.dto.blog.BlogResponse;
 import com.techblog.backend.dto.blog.OutputContentResponse;
@@ -46,21 +47,24 @@ public class BloggedController {
                 .body(blogService.postBlog(blogRequest, request));
     }
 
-//    /**
-//     * Lấy thông tin blog được bảo mật
-//     */
-//    @GetMapping("/auth/{blogId}")
-//    public ResponseEntity<BlogDto> getUserAuthBlog(@PathVariable String blogId) {
-//
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        return ResponseEntity.status(HttpStatus.OK)
-//                .body(blogService.getAuthBlog(auth.getName(), blogId));
-//    }
-//
-//    /**
-//     * Lấy thông tin blog đã được xuất bản
-//     * @return Trả về thông tin blog đã được xuất bản
-//     */
+    @PatchMapping("/{blogId}")
+    public ResponseEntity<BlogResponse> updateBlog(
+            @PathVariable String blogId,
+            @RequestBody BlogPatchRequest blogRequest
+    ) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        blogRequest.setAuthorUsername(auth.getName());
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(blogService.updateBlog(blogId, blogRequest));
+    }
+
+    /**
+     * Lấy thông tin blog công khai
+     * @param blogId ID của blog cần lấy
+     * @param response Đối tượng HttpServletResponse để trả về nội dung blog
+     * @return Trả về ResponseEntity với mã trạng thái OK
+     * @throws IOException Nếu có lỗi khi đọc nội dung blog
+     */
     @GetMapping("/{blogId}")
     public ResponseEntity<Void> viewBlog(@PathVariable String blogId,
                                          HttpServletResponse response) throws IOException {
@@ -78,16 +82,7 @@ public class BloggedController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(null);
     }
-//
-//    @PatchMapping("/{blogId}")
-//    public ResponseEntity<String> updateBlogStatus(
-//            @RequestParam("status") String status
-//    ) {
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        return ResponseEntity.ok()
-//                .body(blogService.updateBlogStatus(auth.getName(), status));
-//    }
-//
+
     /**
      * Xoá blog của người dùng
      * @param blogId ID của blog cần xoá
@@ -99,5 +94,21 @@ public class BloggedController {
         blogService.deleteBlog(auth.getName(), blogId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
                 .body(new BlogResponse(blogId,null, "Blog deleted successfully"));
+    }
+
+    /**
+     * Lấy danh sách blog của người dùng (có phân trang)
+     * @param page trang hiện tại (mặc định = 0)
+     * @param size số phần tử mỗi trang (mặc định = 10)
+     * @return danh sách blog
+     */
+    @GetMapping("")
+    public ResponseEntity<?> getUserBlog(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(blogService.getOwnBlogs(auth.getName(), page, size));
     }
 }

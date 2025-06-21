@@ -3,21 +3,21 @@ package com.techblog.backend.dto.blog;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BlogRequestDto {
-    private String content;
-    private String contentType;
-    private long contentSize;
+public class BlogContentResponse {
+    private String blogId;
     private String title;
-    private String description;
+    private String content;
     private List<String> tags;
-    private String authorUsername;
-    private String blogUrl;
-    private UUID blogId;
+    private String description;
+    private String authorName;
+    private String authorProfilePictureUrl;
+    private LocalDateTime createdAt;
     private boolean isDraft;
 }

@@ -1,5 +1,7 @@
 package com.techblog.backend.utils;
 
+import com.techblog.backend.dto.blog.BlogContentResponse;
+import com.techblog.backend.dto.blog.BlogPatchRequest;
 import com.techblog.backend.dto.blog.BlogRequestDto;
 import com.techblog.backend.dto.user.RegisterForm;
 import com.techblog.backend.dto.user.UserEditForm;
@@ -74,7 +76,12 @@ public class Mapper {
         );
     }
 
-
+    /**
+     * Chuyển đổi BlogRequestDto sang BlogEntity.
+     * @param blogRequest Dữ liệu yêu cầu blog
+     * @param blog Thực thể blog hiện tại
+     * @return BlogEntity đã được cập nhật với các giá trị từ BlogRequestDto
+     */
     public static BlogEntity blogRequest2BlogEntity(BlogRequestDto blogRequest, BlogEntity blog) {
         blog.setTitle(blogRequest.getTitle());
         blog.setDescription(blogRequest.getDescription());
@@ -90,6 +97,41 @@ public class Mapper {
         blog.setHtmlPath(blogRequest.getBlogUrl());
         blog.setContentSize(blogRequest.getContentSize());
         blog.setContentType(blogRequest.getContentType());
+        blog.setDraft(blogRequest.isDraft());
         return blog;
+    }
+
+    public static BlogEntity blogPatch2BlogEntity(BlogPatchRequest blogPatchRequest, BlogEntity blog) {
+        blog.setTitle((String) Utils.setValue(blog.getTitle(), blogPatchRequest.getTitle()));
+        blog.setDescription((String) Utils.setValue(blog.getDescription(), blogPatchRequest.getDescription()));
+        blog.setTags(
+                (String) Utils.setValue(
+                        blog.getTags(),
+                        blogPatchRequest.getTags() != null
+                                ? blogPatchRequest.getTags()
+                                        .stream()
+                                        .reduce(
+                                                "",
+                                                (tag1, tag2) -> tag1 + (tag1.isEmpty() ? "" : ",") + tag2
+                                        )
+                                : null
+                )
+        );
+        blog.setDraft((boolean) Utils.setValue(blog.isDraft(), blogPatchRequest.isDraft()));
+        return blog;
+    }
+
+    public static BlogContentResponse blogEntity2BlogContentResponse(BlogEntity blog) {
+        return new BlogContentResponse(
+                blog.getId().toString(),
+                blog.getTitle(),
+                blog.getHtmlPath(),
+                Utils.extractTags(blog.getTags()),
+                blog.getDescription(),
+                blog.getAuthor().getUsername(),
+                blog.getAuthor().getAvatarUrl(),
+                blog.getCreatedAt(),
+                blog.isDraft()
+        );
     }
 }
