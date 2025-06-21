@@ -22,35 +22,33 @@ public class UserController {
     /**
      * Chỉnh sửa thông tin người dùng
      */
-
-    @PatchMapping("/{userId}")
+    @PatchMapping("")
     public ResponseEntity<UserResponseDto> editUser(
-            @PathVariable Long userId,
             @RequestBody UserEditForm userEditForm
     ) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        UserResponseDto updatedUser = userService.editUser(userId, auth.getName(), userEditForm);
+        UserResponseDto updatedUser = userService.editUser(auth.getName(), userEditForm);
         return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
     }
 
     /**
      * Lấy thông tin người dùng
      */
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserSecureResponse> getUserInfo(@PathVariable Long userId) {
+    @GetMapping("")
+    public ResponseEntity<UserSecureResponse> getUserInfo() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserSecureResponse userInfo = userService.getUserInfo(userId, auth.getName());
+        UserSecureResponse userInfo = userService.getUserInfo(auth.getName());
         return ResponseEntity.status(HttpStatus.OK).body(userInfo);
     }
 
     /**
      * Xoá người dùng
      */
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
+    @DeleteMapping("")
+    public ResponseEntity<Void> deleteUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        userService.deleteUser(userId);
+        userService.deleteUser(auth.getName());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

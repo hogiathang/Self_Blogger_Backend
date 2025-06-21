@@ -36,7 +36,7 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         String method = request.getMethod();
-        if ("GET".equalsIgnoreCase(method) && requestURI.startsWith("/api/v1/images/")) {
+        if ("GET".equalsIgnoreCase(method) && requestURI.startsWith("/api/v1/images/") || requestURI.startsWith("/api/v1/blog/")) {
             return true;
         }
         for (String endPoint : PUBLIC_ENDPOINTS) {

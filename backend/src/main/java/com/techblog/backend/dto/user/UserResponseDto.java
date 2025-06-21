@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserResponseDto {
-    private Long userId;
     private String username;
     private LocalDateTime dateCreated;
     private String avatarUrl;

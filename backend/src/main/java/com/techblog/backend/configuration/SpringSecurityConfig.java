@@ -45,6 +45,7 @@ public class SpringSecurityConfig {
     @Bean
     protected SecurityFilterChain Configuration(HttpSecurity http) throws Exception {
         http
+                .headers(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -56,7 +57,7 @@ public class SpringSecurityConfig {
                         UsernamePasswordAuthenticationFilter.class
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.GET,"/api/v1/images/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/images/**", "/api/v1/blog/**").permitAll()
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated()
                 )

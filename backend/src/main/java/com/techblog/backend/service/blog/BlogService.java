@@ -1,15 +1,25 @@
 package com.techblog.backend.service.blog;
 
-import com.techblog.backend.dto.blog.BlogDto;
+import com.techblog.backend.dto.blog.BlogRequestDto;
+import com.techblog.backend.dto.blog.BlogResponse;
+import com.techblog.backend.dto.blog.OutputContentResponse;
 import com.techblog.backend.entity.blog.BlogEntity;
+import com.techblog.backend.entity.user.UserEntity;
+import com.techblog.backend.exception.all.NoContentException;
 import com.techblog.backend.repository.blog.BlogRepository;
+import com.techblog.backend.repository.user.UserRepository;
 import com.techblog.backend.service.publicInterface.file.FileStorageService;
 import com.techblog.backend.service.publicInterface.file.IBlogService;
+import com.techblog.backend.utils.Mapper;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
+import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,22 +27,29 @@ import java.util.UUID;
 public class BlogService implements IBlogService {
 
     private final FileStorageService fileStorageService;
-
+    private final UserRepository userRepository;
     private final BlogRepository blogRepository;
 
-    public BlogService(FileStorageService fileStorageService,
+    public BlogService(FileStorageService fileStorageService, UserRepository userRepository,
                        BlogRepository blogRepository) {
         this.fileStorageService = fileStorageService;
+        this.userRepository = userRepository;
         this.blogRepository = blogRepository;
     }
 
+    @Transactional
     @Override
-    public String postBlog(BlogDto blogRequest, HttpServletRequest request) throws IOException {
+    public BlogResponse postBlog(BlogRequestDto blogRequest, HttpServletRequest request) throws IOException {
+        UUID blogId = UUID.randomUUID();
 
-        String fileURI = fileStorageService.uploadFile(
-                "blog." + blogRequest.getAuthorName().toLowerCase(),
-                blogRequest.getBlogId().toString() + ".html",
-                blogRequest.getContentStream(),
+        InputStream contentStream = new ByteArrayInputStream(
+                blogRequest.getContent().getBytes(StandardCharsets.UTF_8)
+        );
+
+        fileStorageService.uploadFile(
+                "blog." + blogRequest.getAuthorUsername().toLowerCase(),
+                blogId.toString() + ".html",
+                contentStream,
                 blogRequest.getContentSize(),
                 blogRequest.getContentType()
         );
@@ -42,76 +59,76 @@ public class BlogService implements IBlogService {
                 .append(request.getServerName())
                 .append(":")
                 .append(request.getServerPort())
-                .append("/api/v1/blogs/")
-                .append(blogRequest.getBlogId());
+                .append("/api/v1/blog/")
+                .append(blogId.toString());
 
-        BlogEntity blogEntity = new BlogEntity();
-        blogEntity.setId(blogRequest.getBlogId());
-        blogEntity.setTitle(blogRequest.getTitle());
-        blogEntity.setAuthor(blogRequest.getAuthorName());
-        blogEntity.setHtmlPath(fileURI);
-        blogEntity.setTags(
-                blogRequest.getTags()
-                        .stream()
-                        .reduce(
-                                "",
-                                (tag1, tag2) -> tag1 + (tag1.isEmpty() ? "" : ",") + tag2
-                        )
-        );
-        blogEntity.setDescription(blogRequest.getDescription());
-        blogEntity.setStatus(blogRequest.getStatus());
+        blogRequest.setBlogId(blogId);
+        blogRequest.setBlogUrl(blogUrl.toString());
+
+        BlogEntity blogEntity = Mapper.blogRequest2BlogEntity(blogRequest, new BlogEntity());
+        UserEntity userRef = userRepository.getReferenceById(blogRequest.getAuthorUsername());
+        blogEntity.setAuthor(userRef);
+
         blogRepository.save(blogEntity);
-        return blogUrl.toString();
+        return new BlogResponse(
+                blogEntity.getId().toString(),
+                blogEntity.getHtmlPath(),
+                "Blog created successfully"
+        );
     }
 
     @Override
-    public BlogDto getPublishBlog(String blogId) {
+    public OutputContentResponse getPublishBlog(String blogId) {
         BlogEntity blogEntity = blogRepository.findById(UUID.fromString(blogId))
                 .orElseThrow(() -> new RuntimeException("Blog not found"));
 
-        return createBlogDto(blogEntity);
+        InputStream contentStream = fileStorageService.getFile(
+                "blog." + blogEntity.getAuthor().getUsername().toLowerCase(),
+                blogEntity.getId().toString() + ".html"
+        );
+
+        return  new OutputContentResponse(
+                contentStream,
+                blogEntity.getContentType(),
+                blogEntity.getContentSize(),
+                blogEntity.getTitle(),
+                blogEntity.getHtmlPath(),
+                blogEntity.getId().toString(),
+                blogEntity.getAuthor().getUsername()
+        );
     }
-
-    @Override
-    public BlogDto getAuthBlog(String username, String blogId) {
-        BlogEntity blogEntity = blogRepository.findById(UUID.fromString(blogId))
-                .orElseThrow(() -> new RuntimeException("Blog not found"));
-
-        if (!blogEntity.getAuthor().equalsIgnoreCase(username)) {
-            throw new RuntimeException("You do not have permission to access this blog");
-        }
-        return createBlogDto(blogEntity);
-    }
-
-
+//
+//    @Override
+//    public BlogDto getAuthBlog(String username, String blogId) {
+//        BlogEntity blogEntity = blogRepository.findById(UUID.fromString(blogId))
+//                .orElseThrow(() -> new RuntimeException("Blog not found"));
+//
+////        if (!blogEntity.getAuthor().equalsIgnoreCase(username)) {
+////            throw new RuntimeException("You do not have permission to access this blog");
+////        }
+////        return createBlogDto(blogEntity);
+//        return null;
+//    }
+//
+//
+    @Transactional
     @Override
     public void deleteBlog(String username, String blogId) {
+        BlogEntity blog = this.blogRepository.findById(UUID.fromString(blogId))
+                .orElseThrow(() -> new NoContentException("Blog not found"));
 
-    }
+        if (!blog.getAuthor().getUsername().equalsIgnoreCase(username)) {
+            throw new RuntimeException("You do not have permission to delete this blog");
+        }
 
-    @Override
-    public String updateBlogStatus(String username, String blogId) {
-        return "blog status updated successfully";
-    }
+        if (fileStorageService.deleteFile(
+                "blog." + blog.getAuthor().getUsername().toLowerCase(),
+                blog.getId().toString() + ".html"
+        )) {
+            this.blogRepository.delete(blog);
+        } else {
+            throw new RuntimeException("Failed to delete blog file from storage");
+        }
 
-    private BlogDto createBlogDto(BlogEntity blogEntity) {
-        InputStream contentStream = fileStorageService.getFile(
-                "blog." + blogEntity.getAuthor().toLowerCase(),
-                blogEntity.getId().toString() + ".html"
-
-        );
-
-        BlogDto blogDto = new BlogDto();
-        blogDto.setBlogId(blogEntity.getId());
-        blogDto.setTitle(blogEntity.getTitle());
-        blogDto.setAuthorName(blogEntity.getAuthor());
-        blogDto.setDescription(blogEntity.getDescription());
-        blogDto.setThumbnailUrl(blogEntity.getHtmlPath());
-        blogDto.setTags(List.of(blogEntity.getTags().split(",")));
-        blogDto.setCreatedAt(blogEntity.getCreatedAt());
-        blogDto.setUpdatedAt(blogEntity.getUpdatedAt());
-        blogDto.setStatus(blogEntity.getStatus());
-        blogDto.setContentStream(contentStream);
-        return blogDto;
     }
 }

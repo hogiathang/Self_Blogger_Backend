@@ -129,7 +129,7 @@ public class MinioStorage implements FileStorageService {
      * @param fileName tên file cần xóa
      */
     @Override
-    public void deleteFile(String subBucket, String fileName) {
+    public boolean deleteFile(String subBucket, String fileName) {
         try {
             if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(subBucket).build())) {
                 throw new RuntimeException("Bucket không tồn tại: " + subBucket);
@@ -138,6 +138,7 @@ public class MinioStorage implements FileStorageService {
                         .bucket(subBucket)
                         .object(fileName)
                         .build());
+                return true;
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

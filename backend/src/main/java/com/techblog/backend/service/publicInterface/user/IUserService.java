@@ -5,7 +5,7 @@ import com.techblog.backend.dto.user.UserResponseDto;
 import com.techblog.backend.dto.user.UserSecureResponse;
 
 public interface IUserService {
-    UserSecureResponse getUserInfo(Long id, String username);
-    UserResponseDto editUser(Long id, String username, UserEditForm user);
-    void deleteUser(Long id);
+    UserSecureResponse getUserInfo(String username);
+    UserResponseDto editUser(String username, UserEditForm user);
+    void deleteUser(String username);
 }

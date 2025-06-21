@@ -1,47 +1,43 @@
 package com.techblog.backend.entity.user;
 
+import com.techblog.backend.entity.BaseEntity;
+import com.techblog.backend.entity.blog.BlogEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 
 @Getter
 @Setter
 @Entity(name = "users")
-public class UserEntity {
+public class UserEntity extends BaseEntity implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name= "id", nullable = false)
-    private Long userId;
-
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "email", nullable = true, unique = true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "phone", nullable = true, unique = true)
+    @Column(name = "phone", nullable = false, unique = true)
     private String phone;
-
-    @Column(name = "date_created", nullable = false)
-    private LocalDateTime dateCreated;
 
     @Column(name = "role")
     private String role;
 
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive;
-
     @Column(name = "avatar_url", nullable = false)
     private String avatarUrl;
 
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    private Set<BlogEntity> blogs;
+
     public UserEntity() {
-        this.dateCreated = LocalDateTime.now();
         this.avatarUrl   = "http://localhost:8081/api/v1/images/default/avatar.png";
     }
 
@@ -51,8 +47,14 @@ public class UserEntity {
         this.email = email;
         this.phone = phone;
         this.role = role;
-        this.dateCreated = LocalDateTime.now();
-        this.isActive = true;
         this.avatarUrl = "http://localhost:8081/api/v1/images/default/avatar.png";
+    }
+
+    public void setActive(boolean isActive) {
+        super.setActive(isActive);
+    }
+
+    public LocalDateTime getDateCreated() {
+        return super.getCreatedAt();
     }
 }

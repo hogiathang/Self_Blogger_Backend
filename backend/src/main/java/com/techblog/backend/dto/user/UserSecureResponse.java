@@ -11,8 +11,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserSecureResponse {
-    private Long userId;
-
     private String username;
 
     private String email;

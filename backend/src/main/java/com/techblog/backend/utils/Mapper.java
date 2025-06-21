@@ -1,9 +1,11 @@
 package com.techblog.backend.utils;
 
+import com.techblog.backend.dto.blog.BlogRequestDto;
 import com.techblog.backend.dto.user.RegisterForm;
 import com.techblog.backend.dto.user.UserEditForm;
 import com.techblog.backend.dto.user.UserResponseDto;
 import com.techblog.backend.dto.user.UserSecureResponse;
+import com.techblog.backend.entity.blog.BlogEntity;
 import com.techblog.backend.entity.user.UserEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -29,7 +31,6 @@ public class Mapper {
      */
     public static UserResponseDto userEntity2UserResponseDto(UserEntity user) {
         return new UserResponseDto(
-                user.getUserId(),
                 user.getUsername(),
                 user.getDateCreated(),
                 user.getAvatarUrl(),
@@ -44,7 +45,6 @@ public class Mapper {
      */
     public static UserSecureResponse userEntity2UserSecureResponse(UserEntity user) {
         return new UserSecureResponse(
-                user.getUserId(),
                 user.getUsername(),
                 user.getEmail(),
                 user.getPhone(),
@@ -72,5 +72,24 @@ public class Mapper {
                 registerForm.getPhone(),
                 role
         );
+    }
+
+
+    public static BlogEntity blogRequest2BlogEntity(BlogRequestDto blogRequest, BlogEntity blog) {
+        blog.setTitle(blogRequest.getTitle());
+        blog.setDescription(blogRequest.getDescription());
+        blog.setTags(
+                blogRequest.getTags()
+                        .stream()
+                        .reduce(
+                                "",
+                                (tag1, tag2) -> tag1 + (tag1.isEmpty() ? "" : ",") + tag2
+                        )
+        );
+        blog.setId(blogRequest.getBlogId());
+        blog.setHtmlPath(blogRequest.getBlogUrl());
+        blog.setContentSize(blogRequest.getContentSize());
+        blog.setContentType(blogRequest.getContentType());
+        return blog;
     }
 }

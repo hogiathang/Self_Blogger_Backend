@@ -12,9 +12,12 @@ import com.techblog.backend.repository.user.UserRepository;
 import com.techblog.backend.service.publicInterface.user.IUserPublicService;
 import com.techblog.backend.service.publicInterface.user.IUserService;
 import com.techblog.backend.utils.Mapper;
+import org.apache.coyote.BadRequestException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class UserService implements IUserService, IUserPublicService {
@@ -27,9 +30,9 @@ public class UserService implements IUserService, IUserPublicService {
     }
 
     @Override
-    public UserSecureResponse getUserInfo(Long id, String username) {
-        UserEntity userEntity = userRepository.findById(id)
-                .orElseThrow(() -> new NoContentException("User not found with id: " + id));
+    public UserSecureResponse getUserInfo(String username) {
+        UserEntity userEntity = userRepository.findById(username)
+                .orElseThrow(() -> new NoContentException("User not found with username: " + username));
         if (!userEntity.getUsername().equals(username)) {
             throw new RuntimeException("You are not authorized to view this user");
         }
@@ -38,43 +41,52 @@ public class UserService implements IUserService, IUserPublicService {
 
     @Override
     public UserResponseDto addUser(RegisterForm registerForm) {
-        if (userRepository.findByUsername(registerForm.getUsername()).isPresent()) {
-            throw new UserAlreadyExistedException("User already exists with username: " + registerForm.getUsername());
-        } else {
-            UserEntity userEntity =  userRepository.save(
-                Mapper.registerForm2UserEntity(
-                    registerForm,
-                    passwordEncoder,
-                    "ROLE_USER"
-                )
+        try {
+            userRepository.saveUser(
+                    registerForm.getUsername(), passwordEncoder.encode(registerForm.getPassword()),
+                    registerForm.getEmail(), registerForm.getPhone(), "ROLE_USER", "http://localhost:8081/api/v1/images/default/avatar.png"
             );
-            return Mapper.userEntity2UserResponseDto(userEntity);
+            return new UserResponseDto(
+                    registerForm.getUsername(),
+                    LocalDateTime.now(),
+                    "http://localhost:8081/api/v1/images/default/avatar.png",
+                    true
+            );
+        } catch (Exception e) {
+            if (e.getMessage().contains("users_pkey")) {
+                throw new UserAlreadyExistedException("User already exists with username: " + registerForm.getUsername());
+            }
+
+            if (e.getMessage().contains("users_email_key")) {
+                throw new UserAlreadyExistedException("Email Already Used" + registerForm.getEmail());
+            }
+
+            if (e.getMessage().contains("users_phone_key")) {
+                throw new UserAlreadyExistedException("Phone Number Already Used: " + registerForm.getPhone());
+            }
         }
+        return null;
     }
 
     @Override
-    public UserResponseDto editUser(Long id, String username, UserEditForm user) {
-        UserEntity existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-
-        if (!existingUser.getUsername().equals(username)) {
-            throw new RuntimeException("You are not authorized to edit this user");
-        }
+    public UserResponseDto editUser(String username, UserEditForm user) {
+        UserEntity existingUser = userRepository.findById(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
 
         UserEntity updatedUser = userRepository.save(Mapper.editForm2UserEntity(user, existingUser));
         return Mapper.userEntity2UserResponseDto(updatedUser);
     }
 
     @Override
-    public void deleteUser(Long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
+    public void deleteUser(String username) {
+        if (userRepository.existsById(username)) {
+            userRepository.deleteById(username);
         }
     }
 
     @Override
     public UserResponseDto authenticate(String username, String rawPassword) {
-        UserEntity user = userRepository.findByUsername(username)
+        UserEntity user = userRepository.findById(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {

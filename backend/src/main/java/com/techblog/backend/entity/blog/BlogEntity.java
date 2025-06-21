@@ -1,10 +1,13 @@
 package com.techblog.backend.entity.blog;
 
+import com.techblog.backend.entity.BaseEntity;
+import com.techblog.backend.entity.user.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -14,9 +17,8 @@ import java.util.UUID;
 @Table(name = "blog")
 @AllArgsConstructor
 @NoArgsConstructor
-public class BlogEntity {
+public class BlogEntity extends BaseEntity implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
@@ -26,21 +28,19 @@ public class BlogEntity {
     @Column(name = "html_path", nullable = false, unique = true)
     private String htmlPath;
 
-    @Column(name = "author", nullable = false)
-    private String author;
-
     @Column(name = "tags", nullable = false)
     private String tags;
-
-    @Column(name = "status", nullable = false)
-    private String status;
 
     @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "content_type", nullable = false)
+    private String contentType;
 
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    @Column(name = "content_size", nullable = false)
+    private long contentSize;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "username", nullable = false)
+    private UserEntity author;
 }
